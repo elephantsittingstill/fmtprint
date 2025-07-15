@@ -1,6 +1,7 @@
 #ifndef lexer_h
 #define lexer_h
 
+#include "string.h"
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -8,6 +9,7 @@
 #if defined( _WIN32 ) || defined( _WIN64 )
 #include <io.h>
 #define PLATFORM_WRITE _write
+#define WINDOWS 1
 #else
 #include <unistd.h>
 #define PLATFORM_WRITE write
@@ -97,18 +99,9 @@
  *		'c': char
  *		'p': pointer formatted in an implementation-defined way
  *		'a': double in hexadecimal notation
- *		'n': outputs nothing but writed the number of chars
+ *		'n': outputs nothing but writes the number of chars
  *			 written so far into an integer pointer parameter
  */
-
-/* typedef enum TokenType {
-	PARAMETER,
-	FLAG,
-	WIDTH,
-	PRECISION,
-	LENGTH,
-	TYPE
-} TokenType; */
 
 #if defined( __GNUC__ ) || defined( __clang__ )
 #define USE_COMPUTED_GOTO 1
@@ -117,6 +110,7 @@ void parse_format_goto( const char *fstring );
 #else
 void parse_format_switch( const char *fstring );
 #define USE_COMPUTED_GOTO 0
+void parse_format_switch( const char *fstring );
 #endif
 
 #define isspec( c ) ( ( c == 'd' ) || ( c == 's' ) )
@@ -131,24 +125,26 @@ typedef enum State {
 } State;
 
 typedef struct FormatToken {
-	char flags[5];
+	char flags[4];
 	uint32_t width;
 	uint32_t precision;
-	char length[3];
 	char specifier;
 } FormatToken;
-
-void read_fstring( const char *fstring, ... );
 
 /* Wrapper function which uses either switch or computed goto depending on
  * compiler */
 void parse_format( const char *fstring );
 
+/* Does the actual printing of the constructed string */
 void print_fstring( const char *s, size_t len );
 
-/* Will return length of chars printed */
-int render_token( char *buf, FormatToken *token, va_list *args );
+/* Functions to fill the Token struct*/
+void parse_flags( FormatToken *t, const char **fstring );
+void parse_width( FormatToken *t, const char **fstring );
+void parse_precision( FormatToken *t, const char **fstring );
 
-FormatToken parse_format_token( const char **fstring );
-
+/* FUNCTIONS THAT DO LOGIC DEPENDING ON THE SPECIFIER */
+void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
+							va_list *args );
+char *parse_specifier_d();
 #endif

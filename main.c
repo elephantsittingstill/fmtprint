@@ -5,7 +5,7 @@
 
 int main( int argc, char *argv[] ) {
 	/*read_fstring( "Hello, %s.\n", "friend" );*/
-	parse_format( "Hello, %-s.\n" );
+	parse_format_switch( "%-#17.6s.\n" );
 
 	return EXIT_SUCCESS;
 }
