@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 #include <io.h>
@@ -105,8 +106,8 @@
 
 #if defined( __GNUC__ ) || defined( __clang__ )
 #define USE_COMPUTED_GOTO 1
-void parse_format_switch( const char *fstring );
-void parse_format_goto( const char *fstring );
+void parse_format_switch( const char **fstring, va_list *args );
+void parse_format_goto( const char **fstring, va_list *args );
 #else
 void parse_format_switch( const char *fstring );
 #define USE_COMPUTED_GOTO 0
@@ -133,7 +134,7 @@ typedef struct FormatToken {
 
 /* Wrapper function which uses either switch or computed goto depending on
  * compiler */
-void parse_format( const char *fstring );
+void parse_format( const char *fstring, ... );
 
 /* Does the actual printing of the constructed string */
 void print_fstring( const char *s, size_t len );
@@ -146,5 +147,17 @@ void parse_precision( FormatToken *t, const char **fstring );
 /* FUNCTIONS THAT DO LOGIC DEPENDING ON THE SPECIFIER */
 void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 							va_list *args );
-char *parse_specifier_d();
+
+char *parse_specifier_d( FormatToken *t, va_list *args );
+char *parse_specifier_u( FormatToken *t, va_list *args );
+char *parse_specifier_f( FormatToken *t, va_list *args );
+char *parse_specifier_e( FormatToken *t, va_list *args );
+char *parse_specifier_g( FormatToken *t, va_list *args );
+char *parse_specifier_x( FormatToken *t, va_list *args );
+char *parse_specifier_o( FormatToken *t, va_list *args );
+char *parse_specifier_s( FormatToken *t, va_list *args );
+char *parse_specifier_c( FormatToken *t, va_list *args );
+char *parse_specifier_p( FormatToken *t, va_list *args );
+char *parse_specifier_a( FormatToken *t, va_list *args );
+char *parse_specifier_n( FormatToken *t, va_list *args );
 #endif
