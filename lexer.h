@@ -162,4 +162,7 @@ void parse_specifier_c( FormatToken *t, va_list *args );
 void parse_specifier_p( FormatToken *t, va_list *args );
 void parse_specifier_a( FormatToken *t, va_list *args );
 void parse_specifier_n( FormatToken *t, va_list *args );
+
+/* These functions that put the appropriate raw string conversion into buf */
+int format_raw_int( char *buf, int value );
 #endif
