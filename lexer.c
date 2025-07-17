@@ -118,24 +118,18 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 
 	print_fstring( s.string, s.length );
 	free_String( &s );
-	printf( "flags: %s\n"
-			"width: %d\n"
-			"precision: %d\n"
-			"specifier: %c\n",
-			t.flags, t.width, t.precision, t.specifier );
 }
 #endif
 
 void print_fstring( const char *s, size_t len ) {
 #ifdef WINDOWS
-	len = (unsigned int)len;
+	PLATFORM_WRITE( 1, s, (unsigned int)len );
 #endif
 	PLATFORM_WRITE( 1, s, len );
 }
 
 void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 							va_list *args ) {
-	int value;
 	const char *string;
 	char ch;
 
@@ -145,12 +139,21 @@ void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 		append_cstr_String( s, string );
 		return;
 	case 'd':
-		value = va_arg( *args, int );
-		const char *d_string = parse_specifier_d( t, args );
-		append_cstr_String( s, d_string );
+		parse_specifier_d( s, t, args );
+		return;
 	case 'c':
 		ch = va_arg( *args, int );
 		append_char_String( s, ch );
+		return;
+	case 'f':
+		parse_specifier_f( s, t, args );
+		return;
+	case 'u':
+		parse_specifier_u( s, t, args );
+		return;
+	case 'o':
+		parse_specifier_o( s, t, args );
+		return;
 	}
 }
 
@@ -179,11 +182,7 @@ void parse_flags( FormatToken *t, const char **fstring ) {
 void parse_width( FormatToken *t, const char **fstring ) {
 	int result = 0;
 	while ( isnum( **fstring ) ) {
-		if ( result > 0 ) {
-			result = ( ( result * 10 ) + tonum( **fstring ) );
-		} else {
-			result += tonum( **fstring );
-		}
+		result = ( ( result * 10 ) + tonum( **fstring ) );
 
 		( *fstring )++;
 	}
@@ -198,11 +197,7 @@ void parse_precision( FormatToken *t, const char **fstring ) {
 	( *fstring )++;
 
 	while ( isnum( **fstring ) ) {
-		if ( result > 0 ) {
-			result += ( ( result * 10 ) + tonum( **fstring ) );
-		} else {
-			result += tonum( **fstring );
-		}
+		result += ( ( result * 10 ) + tonum( **fstring ) );
 
 		( *fstring )++;
 	}
@@ -211,4 +206,9 @@ void parse_precision( FormatToken *t, const char **fstring ) {
 	return;
 }
 
-char *parse_specifier_d( FormatToken *t, va_list *args ) { return "penis"; }
+/* void parse_specifier_d( String *s, FormatToken *t, int value ) {
+	char result[12];
+	snprintf( result, 12, "%d", value );
+
+	append_cstr_String( s, result );
+} */

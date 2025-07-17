@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c89 -g #-fsanitize=address
-OBJ = main.o lexer.o string.o
+OBJ = main.o lexer.o string.o specifier.o
 DEPS = lexer.h string.h
 
 printf: $(OBJ)

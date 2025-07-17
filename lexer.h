@@ -144,20 +144,22 @@ void parse_flags( FormatToken *t, const char **fstring );
 void parse_width( FormatToken *t, const char **fstring );
 void parse_precision( FormatToken *t, const char **fstring );
 
+/* Helper functions for flags, width, and precision */
+
 /* FUNCTIONS THAT DO LOGIC DEPENDING ON THE SPECIFIER */
 void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 							va_list *args );
 
-char *parse_specifier_d( FormatToken *t, va_list *args );
-char *parse_specifier_u( FormatToken *t, va_list *args );
-char *parse_specifier_f( FormatToken *t, va_list *args );
-char *parse_specifier_e( FormatToken *t, va_list *args );
-char *parse_specifier_g( FormatToken *t, va_list *args );
-char *parse_specifier_x( FormatToken *t, va_list *args );
-char *parse_specifier_o( FormatToken *t, va_list *args );
-char *parse_specifier_s( FormatToken *t, va_list *args );
-char *parse_specifier_c( FormatToken *t, va_list *args );
-char *parse_specifier_p( FormatToken *t, va_list *args );
-char *parse_specifier_a( FormatToken *t, va_list *args );
-char *parse_specifier_n( FormatToken *t, va_list *args );
+void parse_specifier_d( String *s, FormatToken *t, va_list *args );
+void parse_specifier_u( String *s, FormatToken *t, va_list *args );
+void parse_specifier_f( String *s, FormatToken *t, va_list *args );
+void parse_specifier_o( String *s, FormatToken *t, va_list *args );
+void parse_specifier_e( FormatToken *t, va_list *args );
+void parse_specifier_g( FormatToken *t, va_list *args );
+void parse_specifier_x( FormatToken *t, va_list *args );
+void parse_specifier_s( FormatToken *t, va_list *args );
+void parse_specifier_c( FormatToken *t, va_list *args );
+void parse_specifier_p( FormatToken *t, va_list *args );
+void parse_specifier_a( FormatToken *t, va_list *args );
+void parse_specifier_n( FormatToken *t, va_list *args );
 #endif

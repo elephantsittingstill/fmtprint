@@ -1,11 +1,11 @@
 #include "lexer.h"
-#include "string.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 int main( int argc, char *argv[] ) {
-	/*read_fstring( "Hello, %s.\n", "friend" );*/
-	parse_format( "%-#17.6s%c.\n", "hello ", 'a' );
+	parse_format( "%-#17.6s%c%d.\n", "hello ", 'a', 420 );
+	parse_format( "%f\n", 3.762345 );
+	parse_format( "%u\n", 243762345 );
+	parse_format( "%o\n", 0132 );
 
 	return EXIT_SUCCESS;
 }
