@@ -2,9 +2,8 @@
 #include "string.h"
 
 void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
-	enum { NUMERIC, TEXT, CHAR } Type;
 
-	char temp[64];
+	char temp[128];
 
 	int left_flag = 0;
 	int zero_flag = 0;
@@ -61,6 +60,10 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 			}
 		}
 		break;
+	case 's':
+	case 'c':
+		zero_flag = 0;
+		break;
 	default:
 		break;
 	}
@@ -94,8 +97,7 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 			}
 		} else {
 			/* Right-align: pad with '0' of ' ' */
-			if ( ( zero_flag && t->precision == 0 ) &&
-				 ( t->specifier != 's' && t->specifier != 'c' ) ) {
+			if (( zero_flag && t->precision == 0 )) {
 				/* Inset padding after sign */
 				String temp_str;
 				init_String( &temp_str );
@@ -123,8 +125,62 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 	}
 }
 
-void old_parse_specifier_d( String *s, FormatToken *t, va_list *args ) {
+void parse_specifier_d( String *s, FormatToken *t, va_list *args ) {
+	char raw[32];
 	int value = va_arg( *args, int );
+	int len = format_raw_int( raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+void parse_specifier_u( String *s, FormatToken *t, va_list *args ) {
+	char raw[32];
+	unsigned int value = va_arg( *args, unsigned int );
+	int len = format_raw_unsigned( raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+void parse_specifier_o( String *s, FormatToken *t, va_list *args ) {
+	char raw[32];
+	unsigned int value = va_arg( *args, unsigned int );
+	int len = format_raw_octal( raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+void parse_specifier_x( String *s, FormatToken *t, va_list *args ) {
+	char raw[32];
+	unsigned int value = va_arg( *args, unsigned int );
+	int len = format_raw_hex( raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+void parse_specifier_f( String *s, FormatToken *t, va_list *args ) {
+	char raw[32];
+	double value = va_arg( *args, double );
+	int len = format_raw_float( t, raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+void parse_specifier_s( String *s, FormatToken *t, va_list *args ) {
+	char *value = va_arg( *args, char * );
+	int len = format_raw_string( value );
+	apply_modifiers( s, t, value, len );
+}
+
+void parse_specifier_c( String *s, FormatToken *t, va_list *args ) {
+	char raw[2];
+	int value = va_arg( *args, int );
+	int len = format_raw_char( raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+void parse_specifier_p( String *s, FormatToken *t, va_list *args ) {
+	char raw[32];
+	unsigned long value = va_arg( *args, unsigned long );
+	int len = format_raw_pointer( raw, value );
+	apply_modifiers( s, t, raw, len );
+}
+
+int format_raw_int( char *buf, int value ) {
 	char temp[12];
 	int isnegative = 0;
 	int i = 0;
@@ -149,28 +205,110 @@ void old_parse_specifier_d( String *s, FormatToken *t, va_list *args ) {
 	}
 
 	temp[i] = '\0';
+	int len = i;
 
 	/* reverse the string */
 	int j = 0;
-	char reversed[12];
 	while ( temp[j] ) {
-		reversed[j] = temp[i - 1];
+		buf[j] = temp[i - 1];
 		j++;
 		i--;
 	}
 
-	append_cstr_String( s, reversed );
+	return len;
 }
 
-void parse_specifier_d( String *s, FormatToken *t, va_list *args ) {
-	char raw[32];
-	int value = va_arg( *args, int );
-	int len = format_raw_int( raw, value );
-	apply_modifiers( s, t, raw, len );
+int format_raw_unsigned( char *buf, unsigned int value ) {
+	char temp[12];
+	int i = 0;
+
+	if ( value == 0 ) {
+		temp[0] = '0';
+		temp[1] = '\0';
+	}
+
+	while ( value > 0 ) {
+		temp[i++] = '0' + ( value % 10 );
+		value /= 10;
+	}
+
+	temp[i] = '\0';
+	int len = i;
+
+	/* reverse the string */
+	int j = 0;
+	while ( temp[j] ) {
+		buf[j] = temp[i - 1];
+		j++;
+		i--;
+	}
+
+	return len;
 }
 
-void parse_specifier_f( String *s, FormatToken *t, va_list *args ) {
-	double value = va_arg( *args, double );
+int format_raw_octal( char *buf, unsigned int value ) {
+	char temp[12];
+	int i = 0;
+
+	if ( value == 0 ) {
+		temp[0] = '0';
+		temp[1] = '\0';
+		return 2;
+	}
+
+	while ( value > 0 ) {
+		temp[i++] = '0' + ( value & 0x7 );
+		value >>= 3;
+	}
+
+	temp[i] = '\0';
+
+	int len = i;
+	/* reverse the string */
+	int j = 0;
+	while ( temp[j] ) {
+		buf[j] = temp[i - 1];
+		j++;
+		i--;
+	}
+
+	return len;
+}
+
+int format_raw_hex( char *buf, unsigned int value ) {
+	char temp[12];
+	int i = 0;
+
+	if ( value == 0 ) {
+		temp[0] = '0';
+		temp[1] = '\0';
+		return 2;
+	}
+
+	while ( value > 0 ) {
+		if ( ( value & 0xf ) > 9 ) {
+			temp[i++] = ( 'a' - 10 ) + ( value & 0xf );
+		} else {
+			temp[i++] = '0' + ( value & 0xf );
+		}
+		value >>= 4;
+	}
+
+	temp[i] = '\0';
+
+	int len = i;
+	/* reverse the string */
+	int j = 0;
+	while ( temp[j] ) {
+		buf[j] = temp[i - 1];
+		j++;
+		i--;
+	}
+
+	return len;
+}
+
+int format_raw_float( FormatToken *t, char *buf, double value ) {
 	char temp[12];
 	int isnegative = 0;
 	int dot_placed = 0;
@@ -216,124 +354,38 @@ void parse_specifier_f( String *s, FormatToken *t, va_list *args ) {
 
 	/* reverse the string */
 	int j = 0;
-	char reversed[12];
 	int dot_location = ( i - precision );
 	int steps = i + 1;
 	while ( j < steps ) {
 		if ( j == dot_location && !dot_placed ) {
-			reversed[j++] = '.';
+			buf[j++] = '.';
 			dot_placed = 1;
 			continue;
 		}
-		reversed[j] = temp[i - 1];
-		j++;
-		i--;
-	}
-
-	reversed[j] = '\0';
-
-	append_cstr_String( s, reversed );
-}
-
-void parse_specifier_u( String *s, FormatToken *t, va_list *args ) {
-	unsigned int value = va_arg( *args, unsigned int );
-	char temp[12];
-	int i = 0;
-
-	if ( value == 0 ) {
-		temp[0] = '0';
-		temp[1] = '\0';
-	}
-
-	while ( value > 0 ) {
-		temp[i++] = '0' + ( value % 10 );
-		value /= 10;
-	}
-
-	temp[i] = '\0';
-
-	/* reverse the string */
-	int j = 0;
-	char reversed[12];
-	while ( temp[j] ) {
-		reversed[j] = temp[i - 1];
-		j++;
-		i--;
-	}
-
-	append_cstr_String( s, reversed );
-}
-
-void parse_specifier_o( String *s, FormatToken *t, va_list *args ) {
-	unsigned int value = va_arg( *args, unsigned int );
-	char temp[12];
-	int i = 0;
-
-	if ( value == 0 ) {
-		temp[0] = '0';
-		temp[1] = '\0';
-		return;
-	}
-
-	while ( value > 0 ) {
-		temp[i++] = '0' + ( value & 0x7 );
-		value >>= 3;
-	}
-
-	temp[i] = '\0';
-
-	/* reverse the string */
-	int j = 0;
-	char reversed[12];
-	while ( temp[j] ) {
-		reversed[j] = temp[i - 1];
-		j++;
-		i--;
-	}
-
-	append_cstr_String( s, reversed );
-}
-
-void parse_specifier_e( FormatToken *t, va_list *args );
-void parse_specifier_x( FormatToken *t, va_list *args );
-void parse_specifier_s( FormatToken *t, va_list *args );
-void parse_specifier_c( FormatToken *t, va_list *args );
-void parse_specifier_p( FormatToken *t, va_list *args );
-
-int format_raw_int( char *buf, int value ) {
-	char temp[12];
-	int isnegative = 0;
-	int i = 0;
-
-	if ( value == 0 ) {
-		temp[0] = '0';
-		temp[1] = '\0';
-	}
-
-	if ( value < 0 ) {
-		isnegative = 1;
-		value = -value;
-	}
-
-	while ( value > 0 ) {
-		temp[i++] = '0' + ( value % 10 );
-		value /= 10;
-	}
-
-	if ( isnegative ) {
-		temp[i++] = '-';
-	}
-
-	temp[i] = '\0';
-	int len = i;
-
-	/* reverse the string */
-	int j = 0;
-	while ( temp[j] ) {
 		buf[j] = temp[i - 1];
 		j++;
 		i--;
 	}
 
-	return len;
+	buf[j] = '\0';
+
+	return steps;
 }
+
+int format_raw_string( char *value ) {
+	int i = 0;
+
+	while ( value[i] ) {
+		i++;
+	}
+
+	return i;
+}
+
+int format_raw_char( char *buf, int value ) {
+	buf[0] = value;
+	buf[1] = '\0';
+	return 2;
+}
+
+int format_raw_pointer( char *buf, unsigned long value ) { return 0; }

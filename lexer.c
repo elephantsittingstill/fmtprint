@@ -64,7 +64,6 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 
 		case STATE_FLAGS:
 			if ( isflag( c ) ) {
-				append_cstr_String( &s, "[FLAGS]" );
 				parse_flags( &t, fstring );
 				state = STATE_WIDTH;
 				continue;
@@ -75,7 +74,6 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 
 		case STATE_WIDTH:
 			if ( isnum( c ) ) {
-				append_cstr_String( &s, "[WIDTH]" );
 				parse_width( &t, fstring );
 				state = STATE_PRECISION;
 				continue;
@@ -86,7 +84,6 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 
 		case STATE_PRECISION:
 			if ( c == '.' ) {
-				append_cstr_String( &s, "[PRECISION]" );
 				parse_precision( &t, fstring );
 				state = STATE_SPECIFIER;
 				continue;
@@ -97,21 +94,12 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 
 		case STATE_SPECIFIER:
 			t.specifier = c;
-			/* parse_specifier(&t, &fstring, args) */
-			/*if ( c == 's' ) {
-				append_cstr_String( &s, "[STR]" );
-			} else if ( c == 'd' ) {
-				append_cstr_String( &s, "[INT]" );
-			} else if ( c == 'c' ) {
-				append_cstr_String( &s, "[CHAR]" );
-			} else {
-				append_cstr_String( &s, "[UNKNOWN]" );
-			}*/
 
 			parse_specifier_token( &t, &s, fstring, args );
 
 			state = STATE_TEXT;
 			( *fstring )++;
+			reset_token( &t );
 			break;
 		}
 	}
@@ -135,8 +123,8 @@ void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 
 	switch ( **fstring ) {
 	case 's':
-		string = va_arg( *args, const char * );
-		append_cstr_String( s, string );
+		parse_specifier_s( s, t, args );
+		/* append_cstr_String( s, string ); */
 		return;
 	case 'd':
 		parse_specifier_d( s, t, args );
@@ -153,6 +141,9 @@ void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 		return;
 	case 'o':
 		parse_specifier_o( s, t, args );
+		return;
+	case 'x':
+		parse_specifier_x( s, t, args );
 		return;
 	}
 }
@@ -206,9 +197,10 @@ void parse_precision( FormatToken *t, const char **fstring ) {
 	return;
 }
 
-/* void parse_specifier_d( String *s, FormatToken *t, int value ) {
-	char result[12];
-	snprintf( result, 12, "%d", value );
-
-	append_cstr_String( s, result );
-} */
+void reset_token( FormatToken *t ) {
+	t->precision = 0;
+	t->width = 0;
+	t->flags[0] = 0;
+	t->flags[1] = 0;
+	t->flags[2] = 0;
+}

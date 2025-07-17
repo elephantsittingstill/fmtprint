@@ -132,6 +132,10 @@ typedef struct FormatToken {
 	char specifier;
 } FormatToken;
 
+/* sets all token's values back to zero after done with
+ * using current token */
+void reset_token( FormatToken *t );
+
 /* Wrapper function which uses either switch or computed goto depending on
  * compiler */
 void parse_format( const char *fstring, ... );
@@ -154,15 +158,19 @@ void parse_specifier_d( String *s, FormatToken *t, va_list *args );
 void parse_specifier_u( String *s, FormatToken *t, va_list *args );
 void parse_specifier_f( String *s, FormatToken *t, va_list *args );
 void parse_specifier_o( String *s, FormatToken *t, va_list *args );
-void parse_specifier_e( FormatToken *t, va_list *args );
-void parse_specifier_g( FormatToken *t, va_list *args );
-void parse_specifier_x( FormatToken *t, va_list *args );
-void parse_specifier_s( FormatToken *t, va_list *args );
-void parse_specifier_c( FormatToken *t, va_list *args );
-void parse_specifier_p( FormatToken *t, va_list *args );
-void parse_specifier_a( FormatToken *t, va_list *args );
-void parse_specifier_n( FormatToken *t, va_list *args );
+void parse_specifier_s( String *s, FormatToken *t, va_list *args );
+void parse_specifier_x( String *s, FormatToken *t, va_list *args );
+void parse_specifier_c( String *s, FormatToken *t, va_list *args );
+void parse_specifier_p( String *s, FormatToken *t, va_list *args );
 
 /* These functions that put the appropriate raw string conversion into buf */
 int format_raw_int( char *buf, int value );
+int format_raw_unsigned( char *buf, unsigned int value );
+int format_raw_octal( char *buf, unsigned int value );
+int format_raw_hex( char *buf, unsigned int value );
+int format_raw_float( FormatToken *t, char *buf, double value );
+int format_raw_string( char *value );
+int format_raw_char( char *buf, int value );
+int format_raw_pointer( char *buf, unsigned long value );
+
 #endif
