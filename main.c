@@ -2,7 +2,10 @@
 #include <stdlib.h>
 
 int main() {
-	parse_format( "Value: %x\n", 423 );
+	int x = 14;
+	int *ptr = &x;
+
+	parse_format( "Value: %0p\n", ptr );
 
 	return EXIT_SUCCESS;
 }

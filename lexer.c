@@ -145,6 +145,9 @@ void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 	case 'x':
 		parse_specifier_x( s, t, args );
 		return;
+	case 'p':
+		parse_specifier_p( s, t, args );
+		return;
 	}
 }
 

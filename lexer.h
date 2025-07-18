@@ -171,6 +171,6 @@ int format_raw_hex( char *buf, unsigned int value );
 int format_raw_float( FormatToken *t, char *buf, double value );
 int format_raw_string( char *value );
 int format_raw_char( char *buf, int value );
-int format_raw_pointer( char *buf, unsigned long value );
+int format_raw_pointer( char *buf, void *ptr );
 
 #endif

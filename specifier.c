@@ -44,8 +44,9 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 			raw++;
 			len--;
 		}
-	case 'u':
+	case 'p':
 	case 'x':
+	case 'u':
 	case 'o':
 		/* unsigned int logic */
 		/* precision handling */
@@ -66,6 +67,11 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 		break;
 	default:
 		break;
+	}
+
+	if ( t->specifier == 'x' || t->specifier == 'p' ) {
+		temp[i++] = '0';
+		temp[i++] = 'x';
 	}
 
 	/* -- Copy raw string to temp --  */
@@ -175,8 +181,8 @@ void parse_specifier_c( String *s, FormatToken *t, va_list *args ) {
 
 void parse_specifier_p( String *s, FormatToken *t, va_list *args ) {
 	char raw[32];
-	unsigned long value = va_arg( *args, unsigned long );
-	int len = format_raw_pointer( raw, value );
+	void *ptr = va_arg( *args, void * );
+	int len = format_raw_pointer( raw, ptr );
 	apply_modifiers( s, t, raw, len );
 }
 
@@ -388,4 +394,36 @@ int format_raw_char( char *buf, int value ) {
 	return 2;
 }
 
-int format_raw_pointer( char *buf, unsigned long value ) { return 0; }
+int format_raw_pointer( char *buf, void *ptr ) {
+	uintptr_t addr = (uintptr_t)ptr;
+	char temp[32];
+	int i = 0;
+
+	if ( addr == 0 ) {
+		temp[0] = '0';
+		temp[1] = '\0';
+		return 2;
+	}
+
+	while ( addr > 0 ) {
+		if ( ( addr & 0xf ) > 9 ) {
+			temp[i++] = ( 'a' - 10 ) + ( addr & 0xf );
+		} else {
+			temp[i++] = '0' + ( addr & 0xf );
+		}
+		addr >>= 4;
+	}
+
+	temp[i] = '\0';
+
+	int len = i;
+	/* reverse the string */
+	int j = 0;
+	while ( temp[j] ) {
+		buf[j] = temp[i - 1];
+		j++;
+		i--;
+	}
+
+	return len;
+}
