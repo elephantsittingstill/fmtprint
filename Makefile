@@ -1,16 +1,27 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c89 -g #-fsanitize=address
-OBJ = main.o lexer.o string.o specifier.o
-DEPS = lexer.h string.h
+CFLAGS = -Iinclude -Wall -Wextra -std=c89 -g #-fsanitize=address
+OBJDIR = build
+SRCDIR = src
+TEST_DIR = test
 
-printf: $(OBJ)
+SRC := $(wildcard $(SRCDIR)/*.c)
+OBJ := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
+TARGET = $(TEST_DIR)/test
+TEST_SRC = $(TEST_DIR)/test.c
+
+.PHONY: all clean test
+
+test:
+	./test/run_tests.sh
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ) $(TEST_SRC)
 	$(CC) $(CFLAGS) -o $@ $^
 
-%.o: %.c $(DEPS)
-	$(CC) $(CFLAGS) -c $<
-
-test: 
-	$(CC) $(CFLAGS) test.c -o test
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o printf
+	rm -f $(OBJDIR) $(TARGET)

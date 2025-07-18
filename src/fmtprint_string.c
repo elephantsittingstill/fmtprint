@@ -1,4 +1,4 @@
-#include "string.h"
+#include "fmtprint_string.h"
 #include <stdio.h>
 #include <string.h>
 

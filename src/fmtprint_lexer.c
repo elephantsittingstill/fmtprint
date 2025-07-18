@@ -1,6 +1,5 @@
-#include "lexer.h"
-#include "buffer.h"
-#include "string.h"
+#include "fmtprint_lexer.h"
+#include "fmtprint_string.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,19 +10,11 @@
 	( ( c == '-' ) || ( c == '0' ) || ( c == '\'' ) ||                         \
 	  ( c == 35 ) ) /* 35 for hashtag symbol */
 
-void parse_format( const char *fstring, ... ) {
-
-	va_list args;
-	va_start( args, fstring );
-
-#if USE_COMPUTED_GOTO
-	parse_format_switch( &fstring, &args );
-#else
-	parse_format_goto( &fstring, &args );
-#endif
-
-	return;
-}
+static void reset_token( FormatToken *t );
+static void parse_precision( FormatToken *t, const char **fstring );
+static void parse_width( FormatToken *t, const char **fstring );
+static void parse_flags( FormatToken *t, const char **fstring );
+static void print_fstring( const char *s, size_t len );
 
 #if USE_COMPUTED_GOTO
 void parse_format_switch( const char **fstring, va_list *args ) {
@@ -109,7 +100,7 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 }
 #endif
 
-void print_fstring( const char *s, size_t len ) {
+static void print_fstring( const char *s, size_t len ) {
 #ifdef WINDOWS
 	PLATFORM_WRITE( 1, s, (unsigned int)len );
 #endif
@@ -152,7 +143,7 @@ void parse_specifier_token( FormatToken *t, String *s, const char **fstring,
 }
 
 /* flags: '-', '0', ''', '#' */
-void parse_flags( FormatToken *t, const char **fstring ) {
+static void parse_flags( FormatToken *t, const char **fstring ) {
 	int i = 0;
 	while ( **fstring ) {
 		if ( i > 3 ) {
@@ -173,7 +164,7 @@ void parse_flags( FormatToken *t, const char **fstring ) {
 }
 
 /* width: number */
-void parse_width( FormatToken *t, const char **fstring ) {
+static void parse_width( FormatToken *t, const char **fstring ) {
 	int result = 0;
 	while ( isnum( **fstring ) ) {
 		result = ( ( result * 10 ) + tonum( **fstring ) );
@@ -186,7 +177,7 @@ void parse_width( FormatToken *t, const char **fstring ) {
 }
 
 /* precision: '.n' */
-void parse_precision( FormatToken *t, const char **fstring ) {
+static void parse_precision( FormatToken *t, const char **fstring ) {
 	int result = 0;
 	( *fstring )++;
 
@@ -200,7 +191,7 @@ void parse_precision( FormatToken *t, const char **fstring ) {
 	return;
 }
 
-void reset_token( FormatToken *t ) {
+static void reset_token( FormatToken *t ) {
 	t->precision = 0;
 	t->width = 0;
 	t->flags[0] = 0;

@@ -1,5 +1,5 @@
-#include "lexer.h"
-#include "string.h"
+#include "fmtprint_lexer.h"
+#include "fmtprint_string.h"
 
 void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 
@@ -69,7 +69,7 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 		break;
 	}
 
-	if ( t->specifier == 'x' || t->specifier == 'p' ) {
+	if ( hash_flag && ( t->specifier == 'x' || t->specifier == 'p' ) ) {
 		temp[i++] = '0';
 		temp[i++] = 'x';
 	}
