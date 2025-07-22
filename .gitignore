@@ -1,4 +1,4 @@
 *.o
 .clang-format
-build/*
+build/
 printf
