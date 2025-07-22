@@ -94,7 +94,8 @@ For flags, width, precision:
 ```bash
 fmtprint/
 ├── build/
-│   └── test_objects/
+│   ├── test_objects/
+│   └── test executables...
 ├── include/
 │   └── fmtprint.h
 ├── src/
