@@ -107,13 +107,25 @@ void apply_modifiers( String *s, FormatToken *t, const char *raw, int len ) {
 				/* Inset padding after sign */
 				String temp_str;
 				init_String( &temp_str );
-				append_char_String( &temp_str, temp[0] ); /* The sign */
+
+				/* Include negative sign if present */
+				if ( is_negative ) {
+					append_char_String( &temp_str, temp[0] ); /* The sign */
+				}
+
 				int j = 0;
 				while ( j < padding ) {
 					append_char_String( &temp_str, '0' );
 					j++;
 				}
-				append_cstr_String( &temp_str, temp + 1 );
+
+				/* Disclude negative sign if present */
+				if ( is_negative ) {
+					append_cstr_String( &temp_str, temp + 1 );
+				} else {
+					append_cstr_String( &temp_str, temp );
+				}
+
 				append_cstr_String( s, temp_str.string );
 				free_String( &temp_str );
 			} else {

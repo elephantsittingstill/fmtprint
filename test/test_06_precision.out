@@ -1,0 +1,8 @@
+The following lines will all have .7 precision:
+Int: 42069345
+Unsigned: 42069345
+Octal: 240366541
+Hex: 281ed61
+Float: 4.2069345
+String: Hello There!
+Char: A

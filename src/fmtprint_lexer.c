@@ -11,7 +11,8 @@
 	  ( c == 35 ) ) /* 35 for hashtag symbol */
 
 static void reset_token( FormatToken *t );
-static void parse_precision( FormatToken *t, const char **fstring );
+static void parse_precision( FormatToken *t, const char **fstring,
+							 va_list *args );
 static void parse_width( FormatToken *t, const char **fstring );
 static void parse_flags( FormatToken *t, const char **fstring );
 static void print_fstring( const char *s, size_t len );
@@ -75,7 +76,7 @@ void parse_format_switch( const char **fstring, va_list *args ) {
 
 		case STATE_PRECISION:
 			if ( c == '.' ) {
-				parse_precision( &t, fstring );
+				parse_precision( &t, fstring, args );
 				state = STATE_SPECIFIER;
 				continue;
 			} else {
@@ -177,9 +178,17 @@ static void parse_width( FormatToken *t, const char **fstring ) {
 }
 
 /* precision: '.n' */
-static void parse_precision( FormatToken *t, const char **fstring ) {
+static void parse_precision( FormatToken *t, const char **fstring,
+							 va_list *args ) {
 	int result = 0;
 	( *fstring )++;
+
+	if ( **fstring == '*' ) {
+		int precision = va_arg( *args, int );
+		t->precision = precision;
+		( *fstring )++;
+		return;
+	}
 
 	while ( isnum( **fstring ) ) {
 		result += ( ( result * 10 ) + tonum( **fstring ) );

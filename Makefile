@@ -11,8 +11,6 @@ TEST_SRC = $(TEST_DIR)/test.c
 
 .PHONY: all clean test
 
-test:
-	./test/run_tests.sh
 
 all: $(TARGET)
 
@@ -24,4 +22,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJDIR) $(TARGET)
+	rm -rf $(OBJDIR) $(TARGET)
+
+test:
+	./test/run_tests.sh

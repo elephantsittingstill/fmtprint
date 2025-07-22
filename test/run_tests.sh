@@ -21,7 +21,7 @@ for file in "$TEST_DIR"/test_*.c; do
 	bin="$BIN_DIR/$testname"
 
 	# Compile
-	gcc -std=c89  -I"$INCLUDE_DIR" -o "$bin" "$file" $FMTPRINT_SRC
+	gcc -std=c89 -g -I"$INCLUDE_DIR" -o "$bin" "$file" $FMTPRINT_SRC
 	if [[ $? -ne 0 ]]; then
 		echo -e "${RED}Compile failed: $testname${RESET}"
 		((FAIL++))
@@ -46,6 +46,6 @@ for file in "$TEST_DIR"/test_*.c; do
 			((FAIL++))
 		fi
 	else
-		echo -e "${YELLOW}WARN{$RESET} $testname (no .out file, skipping check)"
+		echo -e "${YELLOW}WARN${RESET} $testname (no .out file, skipping check)"
 	fi
 done
