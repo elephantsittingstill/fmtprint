@@ -5,7 +5,7 @@
 ### Overview
 `fmtprint` is my first attempt at writing my own `printf` function in C.
 It supports custom format strings with flags, width, precision, and 
-most of the main specifiers. Its design is based, but does diverge from,
+most of the main specifiers. Its design is based on, but does diverge from,
 how the original `printf` is written.
 
 ---
