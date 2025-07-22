@@ -28,17 +28,15 @@ how the original `printf` is written.
 ---
 
 ### Building
-> Note: The Makefile will soon add the functionality
-> to build this library into a static archive (`libfmtprint.a`)
-
 To build manually:
 ```bash
-gcc -c 
-ar rcs libfmtprint.a fmtprint.o
+make lib        # builds libfmtprint.a
 ```
-To use in your own project:
+To use in your own project, copy include/fmtprint.h and libfmtprint.a 
+into your project and compile accordingly:
 ```bash
-gcc main.c -L. -lfmtprint -o myprogram
+# depending on your project structure, something like this
+gcc -Iinclude -o prog main.c lib/libfmtprint.a
 ```
 
 ---
